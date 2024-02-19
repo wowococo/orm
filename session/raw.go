@@ -2,8 +2,8 @@ package session
 
 import (
 	"database/sql"
-	"go-scripts/orm/dialect"
-	"go-scripts/orm/schema"
+	"orm/dialect"
+	"orm/schema"
 	"strings"
 )
 

@@ -1,7 +1,7 @@
 package schema
 
 import (
-	"go-scripts/orm/dialect"
+	"orm/dialect"
 	"go/ast"
 	"reflect"
 )
