@@ -1,8 +1,12 @@
+// session 用于实现与数据库的交互
+
 package session
 
 import (
+	"fmt"
 	"orm/schema"
 	"reflect"
+	"strings"
 
 	"orm/log"
 )
@@ -20,4 +24,34 @@ func (s *Session) RefTable() *schema.Schema {
 		log.Error("Model is not set")
 	}
 	return s.refTable
+}
+
+func (s *Session) CreateTable() error {
+	table := s.RefTable()
+
+	var columns []string
+	for _, field := range table.Fields {
+		columns = append(columns, fmt.Sprintf("%s %s %s", field.Name, field.Type, field.Tag))
+	}
+
+	// why named desc
+	desc := strings.Join(columns, ",")
+	_, err := s.Raw(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (%s)", table.Name, desc)).Exec()
+	return err
+}
+
+func (s *Session) DropTable() error {
+	_, err := s.Raw(fmt.Sprintf("DROP TABLE IF EXISTS %s", s.RefTable().Name)).Exec()
+	return err
+}
+
+func (s *Session) HasTable() bool {
+	sql, values := s.dialect.TableExistSQL(s.RefTable().Name)
+	row := s.Raw(sql, values...).QueryRow()
+	var name string
+	if err := row.Scan(&name); err != nil {
+		return false
+	}
+
+	return name == s.RefTable().Name
 }

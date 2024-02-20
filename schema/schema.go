@@ -1,3 +1,5 @@
+// schema 实现对象(object)和表(table)的转换
+
 package schema
 
 import (
@@ -47,7 +49,7 @@ func Parse(dest interface{}, d dialect.Dialect) *Schema {
 				Type: d.DataTypeOf(reflect.Indirect(reflect.New(p.Type))),
 			}
 
-			if v, ok := p.Tag.Lookup("geeorm"); ok {
+			if v, ok := p.Tag.Lookup("orm"); ok {
 				field.Tag = v
 			}
 
