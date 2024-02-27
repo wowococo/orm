@@ -1,4 +1,4 @@
-package util
+package condition
 
 import (
 	"context"
@@ -7,94 +7,35 @@ import (
 	"strings"
 )
 
-type Filter struct {
-	Name      string `json:"name"`
-	Operation string `json:"operation"`
-	Value     any    `json:"value"`
+const MaxSubCondition = 5
+
+type Condition interface {
+	Convert(ctx context.Context) (string, error)
 }
 
-type ViewField struct {
-	Name     string `json:"name"`
-	Type     string `json:"type"`
-	Hidden   bool   `json:"hidden"`
-	Comment  string `json:"comment"`
-	Format   string `json:"format,omitempty"`
-	Analyzer string `json:"analyzer,omitempty"`
+// 将过滤条件拼接到 dsl 请求的 query 部分
+func NewCondition(ctx context.Context, cfg *CondCfg, fieldsMap map[string]string) (cond Condition, err error) {
+	if cond == nil {
+		return nil, nil
+	}
+	switch cfg.Operation {
+	case OperationAnd:
+		cond, err = newAndCond(ctx, cfg, fieldsMap)
+	case OperationOr:
+		cond, err = newOrCond(ctx, cfg, fieldsMap)
+	default:
+		cond, err = NewCondWithOpr(ctx, cfg, fieldsMap)
+	}
+	if err != nil {
+		return nil, err
+	}
 
-	Path []string `json:"-"`
+	return cond, nil
 }
 
-type CondCfg struct {
-	Name        string     `json:"field" mapstructure:"field"`
-	Operation   string     `json:"operation" mapstructure:"operation"`
-	SubConds    []*CondCfg `json:"sub_conditions" mapstructure:"sub_conditions"`
-	ValueOptCfg `mapstructure:",squash"`
-
-	NameField *ViewField `json:"-" mapstructure:"-"`
+func NewCondWithOpr(ctx context.Context, cfg *CondCfg, fieldsMap map[string]string) (Condition, error) {
+	
 }
-
-type ValueOptCfg struct {
-	ValueFrom string `json:"value_from" mapstructure:"value_from"`
-	Value     any    `json:"value" mapstructure:"value"`
-}
-
-const (
-	KEYWORD_SUFFIX           = "keyword"
-	DESENSITIZE_FIELD_SUFFIX = "_desensitize"
-	TEXT_TYPE                = "text"
-
-	// number
-	BYTE       = "byte"
-	LONG       = "long"
-	INTEGER    = "integer"
-	FLOAT      = "float"
-	DOUBLE     = "double"
-	SHORT      = "short"
-	HALF_FLOAT = "half_float"
-
-	// string
-	TEXT    = "text"
-	KEYWORD = "keyword"
-	BINARY  = "binary"
-
-	// bool
-	BOOLEAN = "boolean"
-
-	// date
-	DATE = "date"
-
-	// ip
-	IP = "ip"
-
-	// geo_point
-	GEO_POINT = "geo_point"
-
-	// geo_shape
-	GEO_SHAPE = "geo_shape"
-)
-
-const (
-	OperationAnd = "and"
-	OperationOr  = "or"
-
-	OperationEq         = "="
-	OperationNotEq      = "!="
-	OperationGt         = ">"
-	OperationGte        = ">="
-	OperationLt         = "<"
-	OperationLte        = "<="
-	OperationIn         = "in"
-	OperarionNotIn      = "not_in"
-	OperationLike       = "like"
-	OperationNotLike    = "not_like"
-	OperationContain    = "contain"
-	OperationNotContain = "not_contain"
-	OperationRange      = "range"
-	OperationOutRange   = "out_range"
-	OperationExist      = "exist"
-	operationNotExist   = "not_exist"
-	OperationRegex      = "regex"
-)
 
 func ConvertToDSL(ctx context.Context, cond CondCfg, fieldsMap map[string]string) (string, error) {
 	filterStr := ""
@@ -351,29 +292,6 @@ func ConvertToDSL(ctx context.Context, cond CondCfg, fieldsMap map[string]string
 
 	return filterStr, nil
 
-}
-
-// 将过滤条件拼接到 dsl 请求的 query 部分
-func AppendCondition(ctx context.Context, cond *CondCfg, fieldsMap map[string]string) (dsl string, err error) {
-	if cond == nil {
-		return "", nil
-	}
-	switch cond.Operation {
-	case OperationAnd:
-		cond, err = newAndCond(ctx, cond, fieldsMap)
-	case OperationOr:
-		cond, err = newOrCond(ctx, cond, fieldsMap)
-	default:
-		cond, err = NewCondWithOpr(ctx, cond, fieldsMap)
-	}
-	if err != nil {
-		return "", err
-	}
-
-}
-
-func newAndCond(ctx context.Context, cond *CondCfg, fieldsMap map[string]string) {
-	subConds := []
 }
 
 // 转换成 keyword
