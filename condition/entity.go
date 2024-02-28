@@ -1,45 +1,52 @@
 package condition
 
+import (
+	"orm/common"
+	"orm/value_opt"
+)
+
 const (
 	KEYWORD_SUFFIX           = "keyword"
 	DESENSITIZE_FIELD_SUFFIX = "_desensitize"
 	TEXT_TYPE                = "text"
 
-	// number
-	BYTE       = "byte"
-	LONG       = "long"
-	INTEGER    = "integer"
-	FLOAT      = "float"
-	DOUBLE     = "double"
-	SHORT      = "short"
-	HALF_FLOAT = "half_float"
+	DataType_Byte      = "byte"
+	DataType_Long      = "long"
+	DataType_Integer   = "integer"
+	DataType_Float     = "float"
+	DataType_Double    = "double"
+	DataType_Short     = "short"
+	DataType_HalfFloat = "half_float"
 
-	// string
-	TEXT    = "text"
-	KEYWORD = "keyword"
-	BINARY  = "binary"
+	DataType_Text    = "text"
+	DataType_Keyword = "keyword"
+	DataType_Binary  = "binary"
 
-	// bool
-	BOOLEAN = "boolean"
+	DataType_Boolean = "boolean"
 
-	// date
-	DATE = "date"
+	DataType_Date = "date"
 
-	// ip
-	IP = "ip"
+	DataType_Ip = "ip"
 
-	// geo_point
-	GEO_POINT = "geo_point"
+	DataType_GeoPoint = "geo_point"
 
-	// geo_shape
-	GEO_SHAPE = "geo_shape"
+	DataType_GeoShape = "geo_shape"
 )
+
+func DataType_IsString(t string) bool {
+	return (t == DataType_Text || t == DataType_Keyword)
+}
+
+func DataType_IsNumber(t string) bool {
+	return (t == DataType_Short || t == DataType_Integer || t == DataType_Long ||
+		t == DataType_Float || t == DataType_Double)
+}
 
 const (
 	OperationAnd = "and"
 	OperationOr  = "or"
 
-	OperationEq         = "="
+	OperationEq         = "=="
 	OperationNotEq      = "!="
 	OperationGt         = ">"
 	OperationGte        = ">="
@@ -64,27 +71,11 @@ type Filter struct {
 	Value     any    `json:"value"`
 }
 
-type ViewField struct {
-	Name     string `json:"name"`
-	Type     string `json:"type"`
-	Hidden   bool   `json:"hidden"`
-	Comment  string `json:"comment"`
-	Format   string `json:"format,omitempty"`
-	Analyzer string `json:"analyzer,omitempty"`
-
-	Path []string `json:"-"`
-}
-
 type CondCfg struct {
-	Name        string     `json:"field" mapstructure:"field"`
-	Operation   string     `json:"operation" mapstructure:"operation"`
-	SubConds    []*CondCfg `json:"sub_conditions" mapstructure:"sub_conditions"`
-	ValueOptCfg `mapstructure:",squash"`
+	Name                  string     `json:"field" mapstructure:"field"`
+	Operation             string     `json:"operation" mapstructure:"operation"`
+	SubConds              []*CondCfg `json:"sub_conditions" mapstructure:"sub_conditions"`
+	value_opt.ValueOptCfg `mapstructure:",squash"`
 
-	NameField *ViewField `json:"-" mapstructure:"-"`
-}
-
-type ValueOptCfg struct {
-	ValueFrom string `json:"value_from" mapstructure:"value_from"`
-	Value     any    `json:"value" mapstructure:"value"`
+	NameField *common.ViewField `json:"-" mapstructure:"-"`
 }

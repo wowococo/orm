@@ -3,6 +3,8 @@ package condition
 import (
 	"context"
 	"fmt"
+
+	"orm/common"
 )
 
 type OrCond struct {
@@ -10,7 +12,7 @@ type OrCond struct {
 	mSubConds []Condition
 }
 
-func newOrCond(ctx context.Context, cfg *CondCfg, fieldsMap map[string]string) (Condition, error) {
+func newOrCond(ctx context.Context, cfg *CondCfg, fieldsMap map[string]*common.ViewField) (Condition, error) {
 	subConds := []Condition{}
 
 	if len(cfg.SubConds) == 0 {
@@ -30,7 +32,7 @@ func newOrCond(ctx context.Context, cfg *CondCfg, fieldsMap map[string]string) (
 		subConds = append(subConds, cond)
 	}
 
-	return &AndCond{
+	return &OrCond{
 		mCfg:      cfg,
 		mSubConds: subConds,
 	}, nil
@@ -49,10 +51,14 @@ func (cond *OrCond) Convert(ctx context.Context) (string, error) {
 	`
 
 	dslStr := ""
-	for _, subCond := range cond.mSubConds {
+	for i, subCond := range cond.mSubConds {
 		dsl, err := subCond.Convert(ctx)
 		if err != nil {
 			return "", err
+		}
+
+		if i != len(cond.mSubConds)-1 {
+			dsl += ","
 		}
 
 		dslStr += dsl

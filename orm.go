@@ -1,5 +1,5 @@
 // engine 与用户交互
-package orm
+package main
 
 import (
 	"database/sql"

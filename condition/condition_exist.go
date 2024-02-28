@@ -10,8 +10,11 @@ type ExistCond struct {
 	mfieldName string
 }
 
-func NewExistCond(ctx context.Context) {
-
+func NewExistCond(ctx context.Context, cfg *CondCfg) (Condition, error) {
+	return &ExistCond{
+		mCfg: cfg,
+		mfieldName: cfg.Name,
+	}, nil
 }
 
 func (cond *ExistCond) Convert(ctx context.Context) (string, error) {
