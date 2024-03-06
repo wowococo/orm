@@ -44,9 +44,11 @@ func (cond *EqCond) Convert(ctx context.Context) (string, error) {
 	dslStr := fmt.Sprintf(`
 					{
 						"term": {
-							"%s":  %v
+							"%s": {
+								"value": %v
+							}
 						}
-					}`, cond.mCfg.Name, v)
+					},`, cond.mCfg.Name, v)
 
 	return dslStr, nil
 }

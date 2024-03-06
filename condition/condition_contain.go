@@ -3,6 +3,7 @@ package condition
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"orm/common"
 	"orm/value_opt"
@@ -42,5 +43,54 @@ func NewContainCond(ctx context.Context, cfg *CondCfg, fieldsMap map[string]*com
 }
 
 func (cond *ContainCond) Convert(ctx context.Context) (string, error) {
-	
+	var dslStr string
+	if cond.IsSliceValue {
+		subStrs := []string{}
+		for _, val := range cond.mSliceValue {
+			vStr, ok := val.(string)
+			if ok {
+				val = fmt.Sprintf(`"%s"`, vStr)
+			}
+
+			subStr := fmt.Sprintf(`
+						{
+							"term": {
+								"%s": {
+									"value": %v
+								}
+							}
+						}`, cond.mCfg.Name, val)
+
+			subStrs = append(subStrs, subStr)
+
+		}
+
+		dslStr = fmt.Sprintf(`
+			{
+				"bool": {
+					"filter": [
+						%s
+					]
+				}
+			}
+		`, strings.Join(subStrs, ","))
+
+	} else {
+		val := cond.mValue
+		vStr, ok := val.(string)
+		if ok {
+			val = fmt.Sprintf(`"%s"`, vStr)
+		}
+
+		dslStr = fmt.Sprintf(`
+						{
+							"term": {
+								"%s": {
+									"value": %v
+								}
+							}
+						}`, cond.mCfg.Name, val)
+	}
+
+	return dslStr, nil
 }

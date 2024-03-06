@@ -53,7 +53,7 @@ func (cond *OutRangeCond) Convert(ctx context.Context) (string, error) {
 	if ok {
 		gte = fmt.Sprintf(`"%s"`, gteStr)
 	}
-	// out_range  (-inf, value[0]] || [value[1], +inf)
+	// out_range  (-inf, value[0]) || [value[1], +inf)
 	dslStr := fmt.Sprintf(`
 					{
 						"bool": {

@@ -35,7 +35,7 @@ func NewNotEqCond(ctx context.Context, cfg *CondCfg, fieldsMap map[string]*commo
 
 func (cond *NotEqCond) Convert(ctx context.Context) (string, error) {
 	v := cond.mCfg.Value
-	vStr, ok := cond.mCfg.Value.(string)
+	vStr, ok := v.(string)
 	if ok {
 		v = fmt.Sprintf(`"%s"`, vStr)
 	}
@@ -46,12 +46,14 @@ func (cond *NotEqCond) Convert(ctx context.Context) (string, error) {
 							"must_not": [
 								{
 									"term": {
-										"%s": %v
+										"%s": {
+											"value": %v
+										}
 									}
 								}
 							]
 						}
-					}`, cond.mCfg.Name, v)
+					}, `, cond.mCfg.Name, v)
 
 	return dslStr, nil
 }
