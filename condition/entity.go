@@ -61,7 +61,7 @@ const (
 	OperationRange      = "range"
 	OperationOutRange   = "out_range"
 	OperationExist      = "exist"
-	operationNotExist   = "not_exist"
+	OperationNotExist   = "not_exist"
 	OperationRegex      = "regex"
 )
 

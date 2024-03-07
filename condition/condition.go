@@ -71,7 +71,7 @@ func NewCondWithOpr(ctx context.Context, cfg *CondCfg, fieldsMap map[string]*com
 		cond, err = NewOutRangeCond(ctx, cfg, fieldsMap)
 	case OperationExist:
 		cond, err = NewExistCond(ctx, cfg)
-	case operationNotExist:
+	case OperationNotExist:
 		cond, err = NewNotExistCond(ctx, cfg)
 	case OperationRegex:
 		cond, err = NewRegexCond(ctx, cfg, fieldsMap)
